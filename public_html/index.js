@@ -80,7 +80,7 @@ const populateTable = async (tableId, tableData) => {
 const populateFoodDeliveryTable = async () => {
     const foodDeliveryTableId = "food-delivery-expense-table"
     let resp = await fetch("/expenseMonthly?" + new URLSearchParams({
-        month: 8,
+        month: 9,
         year: 2023,
         expenseTypes: 3
     }))
@@ -90,7 +90,7 @@ const populateFoodDeliveryTable = async () => {
 
 const updateExpense = async () => {
     let resp = await fetch("/expenseMonthly?" + new URLSearchParams({
-        month: 8,
+        month: 9,
         year: 2023,
     }))
     const jsonResp = await resp.json();
