@@ -66,6 +66,42 @@
 
             </div>
         </div>
+        <!-- Row for Month / Year Btns -->
+        <div class="row">
+            <div class="col">
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">Month</span>
+                    </div>
+                    <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false"
+                        id="expense-month-dropdown-btn">Dropdown</button>
+                    <ul class="dropdown-menu dropdown-menu-end" id="expense-month-dropdown">
+                        <li><a class="dropdown-item" data-month="1" href="#">January</a></li>
+                        <li><a class="dropdown-item" data-month="2" href="#">February</a></li>
+                        <li><a class="dropdown-item" data-month="3" href="#">March</a></li>
+                        <li><a class="dropdown-item" data-month="4" href="#">April</a></li>
+                        <li><a class="dropdown-item" data-month="5" href="#">May</a></li>
+                        <li><a class="dropdown-item" data-month="6" href="#">June</a></li>
+                        <li><a class="dropdown-item" data-month="7" href="#">July</a></li>
+                        <li><a class="dropdown-item" data-month="8" href="#">August</a></li>
+                        <li><a class="dropdown-item" data-month="9" href="#">September</a></li>
+                        <li><a class="dropdown-item" data-month="10" href="#">October</a></li>
+                        <li><a class="dropdown-item" data-month="11" href="#">November</a></li>
+                        <li><a class="dropdown-item" data-month="12" href="#">December</a></li>
+                    </ul>
+
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">Year</span>
+                    </div>
+                <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false"
+                    id="expense-year-dropdown-btn">Dropdown</button>
+                <ul class="dropdown-menu dropdown-menu-end" id="expense-year-dropdown">
+                    <li><a class="dropdown-item" data-year="2023" href="#">2023</a></li>
+                    <li><a class="dropdown-item" data-year="2024" href="#">2024</a></li>
+                </ul>
+                </div>
+            </div>
+        </div>
         <div class="row">
             <!-- <div class="col-sm">
                 One of three columns

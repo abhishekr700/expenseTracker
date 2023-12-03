@@ -1,5 +1,6 @@
 let selectedExpenseTypeId;
 
+
 const getTodayDate = () => {
     let date = new Date();
     const offset = date.getTimezoneOffset();
