@@ -24,6 +24,10 @@ const ExpenseEntries = {
     date: {
         type: DataTypes.DATEONLY,
         allowNull: false
+    },
+    splitwiseExpenseId: {
+        type: DataTypes.INTEGER,
+        allowNull: true
     }
 };
 

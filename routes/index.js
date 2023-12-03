@@ -27,11 +27,15 @@ const getTypeData = async (typeId) => {
     return typeData;
 };
 
-const insertExpenseEntry = async (name, amount, date, typeId) => {
+const insertExpenseEntry = async (
+    name, amount, date, typeId, splitwiseExpenseId) => {
+    console.log("insertExpenseEntry:", {
+        name, amount, date, typeId, splitwiseExpenseId
+    });
     try {
         const result = await sequelize.transaction(async (t) => {
             const createRes = await expenseEntries.create({
-                name, amount, date
+                name, amount, date, splitwiseExpenseId
             });
             const typeData = await getTypeData(typeId);
             const createRes2 = await expenseEntryToTypeMap.create({
@@ -140,7 +144,8 @@ router.post("/expenseTypes", async (req, res) => {
 
 // Add a new expense
 router.post("/expenseEntry", async (req, res, next) => {
-    const { name, amount, date, typeId } = req.body;
+    console.log("/expenseEntry", req.body);
+    const { name, amount, date, typeId, splitwiseExpenseId } = req.body;
     try {
         if (!name || !amount || !date || !typeId) {
             return res.status(400).send("Input Invalid");
@@ -150,12 +155,29 @@ router.post("/expenseEntry", async (req, res, next) => {
             return res.status(400).send(ErrorMessages.typeIdNotFound);
         }
         // Insert Entry
-        const insertRes = await insertExpenseEntry(name, amount, date, typeId);
+        const insertRes = await insertExpenseEntry(
+            name, amount, date, typeId, splitwiseExpenseId);
         console.log({ insertRes });
         return res.send(insertRes);
     } catch (e) {
         next(e);
     }
+});
+
+router.get("/checkExpenseExistsBySplitwiseId", async (req, res) => {
+    const { splitwiseExpenseId } = req.query;
+    console.log("checkExpenseExistsBySplitwiseId: ", req.query);
+
+
+    const expense = await expenseEntries.findOne({
+        where: {
+            splitwiseExpenseId: splitwiseExpenseId
+        }
+    });
+
+    res.send({
+        exists: expense !== null
+    });
 });
 
 // Get list of expenses for a Month,Year
