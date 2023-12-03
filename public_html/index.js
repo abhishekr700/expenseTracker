@@ -1,11 +1,19 @@
 let selectedExpenseTypeId;
+let selectedMonth
+let selectedYear
 
-
+// Returns date in YYYY-MM-DD
 const getTodayDate = () => {
     let date = new Date();
     const offset = date.getTimezoneOffset();
     date = new Date(date.getTime() - (offset * 60 * 1000));
-    return date.toISOString().split('T')[0];
+    const formattedDate = date.toISOString().split('T')[0]
+    console.log(formattedDate);
+    return {
+        date: date.toISOString().split('T')[0],
+        month: moment(date).format("MM"),
+        year: moment(date).format("YYYY")
+    }
 };
 
 const getCategories = async () => {
@@ -25,13 +33,40 @@ const populateCategories = async () => {
     for (const expenseType of expenseTypes) {
         typeDropdown.append(`<li><a class="dropdown-item" href="#" data-expensetype-id=${expenseType.id}>${expenseType.name}</a></li>`);
     }
+}
 
+// Setup the dropdown event listeners
+const setupDropdowns = (month, year) => {
+    $("#expense-month-dropdown-btn").text(month)
+    $("#expense-year-dropdown-btn").text(year)
+
+    // Dropdown event listener for expense types
     $('#expense-entry-type-dropdown a').on('click', function () {
         const txt = ($(this).text());
         $("#expense-entry-type-dropdown-btn").text(txt)
         const id = $(this).attr('data-expensetype-id');
         selectedExpenseTypeId = id;
         console.log("Your Favourite Sports is " + txt + id);
+    });
+
+    // Dropdown event listener for month dropdown
+    $('#expense-month-dropdown a').on('click', function () {
+        const txt = ($(this).text());
+        $("#expense-month-dropdown-btn").text(txt)
+        const id = $(this).attr('data-month');
+        selectedMonth = id;
+        console.log("Month Selected:" + txt + id);
+        updateExpense()
+    });
+
+    // Dropdown event listener for year dropdown
+    $('#expense-year-dropdown a').on('click', function () {
+        const txt = ($(this).text());
+        $("#expense-year-dropdown-btn").text(txt)
+        const id = $(this).attr('data-year');
+        selectedYear = id;
+        console.log("Year Selected:" + txt + id);
+        updateExpense()
     });
 }
 
@@ -89,10 +124,16 @@ const populateFoodDeliveryTable = async () => {
     await populateTable(foodDeliveryTableId, jsonResp)
 }
 
+// Updates the expenses into the table.
 const updateExpense = async () => {
+    if (selectedMonth === undefined || selectedYear === undefined) {
+        console.log(`One of month/year selections is undefined. ${selectedMonth}-${selectedYear}`);
+        return;
+    }
+    console.log(`Fetching expenses: ${selectedMonth}-${selectedYear}`);
     let resp = await fetch("/expenseMonthly?" + new URLSearchParams({
-        month: 9,
-        year: 2023,
+        month: selectedMonth,
+        year: selectedYear,
     }))
     const jsonResp = await resp.json();
     console.log(jsonResp);
@@ -101,6 +142,7 @@ const updateExpense = async () => {
     const allExpTable = $("#all-expense-table-body");
     allExpTable.html('')
 
+    // Append "Total" header at the top
     let tableRow = `
         <tr>
             <td></td>
@@ -111,12 +153,13 @@ const updateExpense = async () => {
         `
     allExpTable.append(tableRow)
 
+    // Populate expenses
     for (const expense of expenseList) {
         const formattedDate = moment(expense.date, 'YYYY-MM-DD').format('MMMM D');
-        console.log({
-            original: expense.date,
-            formattedDate
-        });
+        // console.log({
+        //     original: expense.date,
+        //     formattedDate
+        // });
         let tableRow = `
         <tr>
             <td>${formattedDate}</td>
@@ -139,8 +182,17 @@ window.onload = async () => {
     const expenseNameField = $("#expense-entry-name");
     const expenseAmtField = $("#expense-entry-amt");
 
+    const { date, month, year } = getTodayDate()
+
     // Set some defaults
-    datePicker.val(getTodayDate());
+    selectedMonth = month
+    selectedYear = year
+    console.log({
+        date, month, year
+    });
+    datePicker.val(date);
+
+    setupDropdowns(month, year)
 
     // Handle click on Add Expense button
     $("#expense-entry-submit-btn").on('click', async () => {
@@ -178,7 +230,8 @@ window.onload = async () => {
 
     await updateExpense();
 
-    await populateFoodDeliveryTable()
+    // TODO: turn it on later
+    // await populateFoodDeliveryTable()
     const table = $('#all-expense-table').DataTable({
         columnDefs: [
             { orderable: false, targets: 0 }
