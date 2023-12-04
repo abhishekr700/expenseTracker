@@ -81,7 +81,7 @@ const populateTable = async (tableId, tableData) => {
         table: allExpTable,
         tableBody: tableBody
     });
-
+    // Clear old data
     tableBody.html('')
 
 
@@ -107,6 +107,7 @@ const populateTable = async (tableId, tableData) => {
             <td>${expense.name}</td>
             <td class="text-end">${expense.amount}</td>
             <td>${expense.ExpenseTypes[0].name}</td>
+            <td><button>Edit</button></td>
         </tr>
         `
         tableBody.append(tableRow)
@@ -137,39 +138,8 @@ const updateExpense = async () => {
     }))
     const jsonResp = await resp.json();
     console.log(jsonResp);
-    const expenseList = jsonResp.expenseEntries;
-    const total = jsonResp.total
-    const allExpTable = $("#all-expense-table-body");
-    allExpTable.html('')
+    await populateTable("all-expense-table", jsonResp)
 
-    // Append "Total" header at the top
-    let tableRow = `
-        <tr>
-            <td></td>
-            <td>Total</td>
-            <td class="text-end">${total}</td>
-            <td></td>
-        </tr>
-        `
-    allExpTable.append(tableRow)
-
-    // Populate expenses
-    for (const expense of expenseList) {
-        const formattedDate = moment(expense.date, 'YYYY-MM-DD').format('MMMM D');
-        // console.log({
-        //     original: expense.date,
-        //     formattedDate
-        // });
-        let tableRow = `
-        <tr>
-            <td>${formattedDate}</td>
-            <td>${expense.name}</td>
-            <td class="text-end">${expense.amount}</td>
-            <td>${expense.ExpenseTypes[0].name}</td>
-        </tr>
-        `
-        allExpTable.append(tableRow)
-    }
 }
 
 
