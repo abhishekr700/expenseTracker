@@ -76,7 +76,7 @@ const getExpenseForMonth = async (month, year, category) => {
                 ),
             ],
         },
-        order: [['date', 'DESC']],
+        order: [['date', 'DESC'], ['createdAt', 'ASC']],
         include: [{
             model: expenseTypes,
             where: expenseTypeWhereClause
