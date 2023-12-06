@@ -91,6 +91,7 @@ const populateTable = async (tableId, tableData) => {
             <td>Total</td>
             <td class="text-end">${total}</td>
             <td></td>
+            <td></td>
         </tr>
         `
     tableBody.append(tableRow)
@@ -210,8 +211,11 @@ window.onload = async () => {
         "pageLength": 100
         // stateSave: true
     });
-    table.order.neutral().draw();
+    // table.order.neutral().draw();
 
+    $("#all-expense-table").on("click", (e) => {
+        console.log("Click", e.target);
+    })
 
 
 };
