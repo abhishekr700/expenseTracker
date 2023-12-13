@@ -163,7 +163,6 @@ window.onload = async () => {
     });
     datePicker.val(date);
 
-    setupDropdowns(month, year)
 
     // Handle click on Add Expense button
     $("#expense-entry-submit-btn").on('click', async () => {
@@ -198,6 +197,11 @@ window.onload = async () => {
     })
 
     await populateCategories()
+    /* Make sure populateCategories() is invoked before you setup dropdowns as 
+       event listeners are attached to <a> tags added by populateCategories()
+    */
+    setupDropdowns(month, year)
+
 
     await updateExpense();
 
