@@ -3,6 +3,8 @@ services:
   expense-tracker:
     build:
       context: .
+    container_name: expense-tracker
+    restart: unless-stopped
     environment:
       DB_SCHEMA: postgres
       DB_HOST: ${DB_HOST}
