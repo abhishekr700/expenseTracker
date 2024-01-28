@@ -1,7 +1,12 @@
 const router = require("express").Router();
 const { Op, Sequelize } = require("sequelize");
 
-const { expenseTypes, expenseEntries, expenseEntryToTypeMap, sequelize } = require("../models");
+const {
+    expenseTypes,
+    expenseEntries,
+    expenseEntryToTypeMap,
+    sequelize
+} = require("../models");
 
 const ErrorMessages = {
     typeIdNotFound: "The typeId does not correspond to a valid Expense Type"
@@ -162,6 +167,45 @@ router.post("/expenseEntry", async (req, res, next) => {
     } catch (e) {
         next(e);
     }
+});
+
+router.patch("/expenseEntry", async (req, res) => {
+    console.log("PATCH /expenseEntry", req.body);
+    const { name, amount, date, typeId, expenseId } = req.body;
+    if (!expenseId) {
+        return res.status(400).send("Input Invalid. Must have expenseId");
+    }
+    // TODO: make this a transaction
+
+    const expense = await expenseEntries.findByPk(expenseId);
+
+    if (name) {
+        expense.name = name;
+    }
+    if (amount) {
+        expense.amount = amount;
+    }
+    if (date) {
+        expense.date = date;
+    }
+    console.log(expense);
+    await expense.save();
+
+    const expenseEntry = await expenseEntryToTypeMap.findOne({
+        where: {
+            ExpenseEntryId: expenseId
+        }
+    });
+    expenseEntry.ExpenseTypeId = typeId;
+    await expenseEntry.save();
+
+    // Retrieve the updated expense with corresponding expenseType
+    const updatedExpense = await expenseEntries.findByPk(expenseId, {
+        include: expenseTypes
+    });
+    console.log(updatedExpense);
+
+    return res.send(updatedExpense);
 });
 
 router.get("/checkExpenseExistsBySplitwiseId", async (req, res) => {
