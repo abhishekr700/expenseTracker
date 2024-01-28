@@ -5,6 +5,7 @@ RUN mkdir -p /opt/app
 WORKDIR /opt/app
 COPY package.json package-lock.json ./
 RUN npm install
+RUN npm install pm2 -g
 COPY . .
 EXPOSE 4000
-CMD [ "node", "app.js"]
+CMD [ "pm2-runtime", "app.js"]
