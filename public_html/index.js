@@ -1,6 +1,7 @@
 let selectedExpenseTypeId;
 let selectedMonth;
 let selectedYear;
+let table;
 
 // Returns date in YYYY-MM-DD
 const getTodayDate = () => {
@@ -73,10 +74,10 @@ const setupDropdowns = (month, year) => {
 
 const createTableRow = (expenseId, expenseDate, expenseName, expenseAmt, expenseTypeId, expenseTypeName) => {
     const formattedDate = moment(expenseDate, 'YYYY-MM-DD').format('MMMM D');
-    console.log({
-        original: expenseDate,
-        formattedDate
-    });
+    // console.log({
+    //     original: expenseDate,
+    //     formattedDate
+    // });
     // TODO: refactor to use the createTableRowCells() function
     const tableRow = `
         <tr id='row-${expenseId}' data-expense-id='${expenseId}'>
@@ -93,10 +94,10 @@ const createTableRow = (expenseId, expenseDate, expenseName, expenseAmt, expense
 // Create HTML for cells within a table row
 const createTableRowCells = (expenseDate, expenseName, expenseAmt, expenseTypeId, expenseTypeName) => {
     const formattedDate = moment(expenseDate, 'YYYY-MM-DD').format('MMMM D');
-    console.log({
-        original: expenseDate,
-        formattedDate
-    });
+    // console.log({
+    //     original: expenseDate,
+    //     formattedDate
+    // });
     const tableRow = `
             <td data-date='${expenseDate}'>${formattedDate}</td>
             <td>${expenseName}</td>
@@ -109,6 +110,13 @@ const createTableRowCells = (expenseDate, expenseName, expenseAmt, expenseTypeId
 
 // Populates the table with id tableId with data from tableData
 const populateTable = async (tableId, tableData) => {
+    console.log("populateTable()");
+    // Hack: Destroy the datatable to recreate it using the fresh DOM data later.
+    // More explanation in comment down below.
+    if (table) {
+        table.destroy()
+    }
+
     const total = tableData.total;
     const expenseList = tableData.expenseEntries;
 
@@ -134,9 +142,26 @@ const populateTable = async (tableId, tableData) => {
         `;
     tableBody.append(tableRow);
 
+    // table.row.add(["1", "2", "3", "4", "5"]).draw()
+
     for (const expense of expenseList) {
         tableBody.append(createTableRow(expense.id, expense.date, expense.name, expense.amount, expense.ExpenseTypes[0].id, expense.ExpenseTypes[0].name));
+        // table.row.add([expense.date, expense.name, expense.amount, expense.ExpenseTypes[0].name, `<i class="fa fa-pencil-square" aria-hidden="true">`]).draw()
     }
+
+    // Recreate the datatable so that it picks up the updated row data.
+    // Note: This is a hacky way to do this ie to delete (table.destroy() invoked above) and recreate the datatable.
+    // Ideally, we should use the datatables api to update the new row data, but that would require
+    // significant refactoring due to the usage of buttons in last column, data attributes etc
+    // So until I have the time & patience to do that refactoring, this is what I'm gonna commit.
+    table = $('#all-expense-table').DataTable({
+        "columnDefs": [
+            { orderable: false, targets: 0 }
+        ],
+        "order": [],
+        "pageLength": 100
+        // stateSave: true
+    });
 };
 
 const populateFoodDeliveryTable = async () => {
@@ -186,6 +211,19 @@ window.onload = async () => {
     });
     datePicker.val(date);
 
+    // table = $('#all-expense-table').DataTable({
+    //     "columnDefs": [
+    //         { orderable: false, targets: 0 }
+    //     ],
+    //     "order": [],
+    //     "pageLength": 100,
+    //     createdRow: (row, data) => {
+    //         // $(row).attr('data-expense-id', data.id);
+    //         console.log("CreatedRow !", data);
+    //     }
+    //     // stateSave: true
+    // });
+
 
     // Handle click on Add Expense button
     $("#expense-entry-submit-btn").on('click', async () => {
@@ -230,14 +268,7 @@ window.onload = async () => {
 
     // TODO: turn it on later
     // await populateFoodDeliveryTable()
-    const table = $('#all-expense-table').DataTable({
-        "columnDefs": [
-            { orderable: false, targets: 0 }
-        ],
-        "order": [],
-        "pageLength": 100
-        // stateSave: true
-    });
+
     // table.order.neutral().draw();
 
     // Handle Edit Expense Button
