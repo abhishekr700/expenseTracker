@@ -14,5 +14,5 @@ app.use(express.static('public_html'));
 app.use('/', require("./routes"));
 
 app.listen(config.server.port, () => {
-    console.log("Server Started");
+    console.log(`Server Started on port ${config.server.port}`);
 });
