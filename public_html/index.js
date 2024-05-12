@@ -59,6 +59,7 @@ const setupDropdowns = (month, year) => {
         selectedMonth = id;
         console.log("Month Selected:" + txt + id);
         updateExpense();
+        populateFoodDeliveryTable()
     });
 
     // Dropdown event listener for year dropdown
@@ -69,6 +70,7 @@ const setupDropdowns = (month, year) => {
         selectedYear = id;
         console.log("Year Selected:" + txt + id);
         updateExpense();
+        populateFoodDeliveryTable()
     });
 };
 
@@ -167,8 +169,8 @@ const populateTable = async (tableId, tableData) => {
 const populateFoodDeliveryTable = async () => {
     const foodDeliveryTableId = "food-delivery-expense-table";
     const resp = await fetch("/expenseMonthly?" + new URLSearchParams({
-        month: 9,
-        year: 2023,
+        month: selectedMonth,
+        year: selectedYear,
         expenseTypes: 3
     }));
     const jsonResp = await resp.json();
@@ -267,7 +269,7 @@ window.onload = async () => {
     await updateExpense();
 
     // TODO: turn it on later
-    // await populateFoodDeliveryTable()
+    await populateFoodDeliveryTable()
 
     // table.order.neutral().draw();
 
