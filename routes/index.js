@@ -33,14 +33,14 @@ const getTypeData = async (typeId) => {
 };
 
 const insertExpenseEntry = async (
-    name, amount, date, typeId, splitwiseExpenseId) => {
+    name, amount, date, typeId, splitwiseExpenseId, upiReferenceNum) => {
     console.log("insertExpenseEntry:", {
-        name, amount, date, typeId, splitwiseExpenseId
+        name, amount, date, typeId, splitwiseExpenseId, upiReferenceNum
     });
     try {
         const result = await sequelize.transaction(async (t) => {
             const createRes = await expenseEntries.create({
-                name, amount, date, splitwiseExpenseId
+                name, amount, date, splitwiseExpenseId, upiReferenceNum
             });
             const typeData = await getTypeData(typeId);
             const createRes2 = await expenseEntryToTypeMap.create({
@@ -150,7 +150,13 @@ router.post("/expenseTypes", async (req, res) => {
 // Add a new expense
 router.post("/expenseEntry", async (req, res, next) => {
     console.log("/expenseEntry", req.body);
-    const { name, amount, date, typeId, splitwiseExpenseId } = req.body;
+    const {
+        name,
+        amount,
+        date,
+        typeId,
+        splitwiseExpenseId,
+        upiReferenceNum } = req.body;
     try {
         if (!name || !amount || !date || !typeId) {
             return res.status(400).send("Input Invalid");
@@ -161,7 +167,7 @@ router.post("/expenseEntry", async (req, res, next) => {
         }
         // Insert Entry
         const insertRes = await insertExpenseEntry(
-            name, amount, date, typeId, splitwiseExpenseId);
+            name, amount, date, typeId, splitwiseExpenseId, upiReferenceNum);
         console.log({ insertRes });
         return res.send(insertRes);
     } catch (e) {
@@ -216,6 +222,26 @@ router.get("/checkExpenseExistsBySplitwiseId", async (req, res) => {
     const expense = await expenseEntries.findOne({
         where: {
             splitwiseExpenseId: splitwiseExpenseId
+        }
+    });
+
+    res.send({
+        exists: expense !== null
+    });
+});
+
+// Check if a expense entry exists with the given UPI Reference Number
+router.get("/checkExpenseExistsByUpiReferenceNum", async (req, res) => {
+    const { upiReferenceNum } = req.query;
+    console.log("checkExpenseExistsByUpiReferenceNum: ", req.query);
+
+    if (upiReferenceNum === undefined) {
+        return res.status(400).send("upiReferenceNum is undefined");
+    }
+
+    const expense = await expenseEntries.findOne({
+        where: {
+            upiReferenceNum: upiReferenceNum
         }
     });
 
