@@ -4,6 +4,8 @@ services:
       context: .
     container_name: expense-tracker
     restart: unless-stopped
+    networks:
+      - expense-network
     environment:
       DB_SCHEMA: postgres
       DB_HOST: ${DB_HOST}
@@ -14,4 +16,8 @@ services:
     ports:
       - "3000:4000"
     extra_hosts:
-        - "host.docker.internal:host-gateway"
+      - "host.docker.internal:host-gateway"
+
+networks:
+  expense-network:
+    external: true
