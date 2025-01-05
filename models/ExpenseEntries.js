@@ -32,6 +32,10 @@ const ExpenseEntries = {
     upiReferenceNum: {
         type: DataTypes.STRING,
         allowNull: true
+    },
+    externalUniqueId: {
+        type: DataTypes.STRING,
+        allowNull: true
     }
 };
 

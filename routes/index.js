@@ -33,14 +33,31 @@ const getTypeData = async (typeId) => {
 };
 
 const insertExpenseEntry = async (
-    name, amount, date, typeId, splitwiseExpenseId, upiReferenceNum) => {
+    name,
+    amount,
+    date,
+    typeId,
+    splitwiseExpenseId,
+    upiReferenceNum,
+    externalUniqueId) => {
     console.log("insertExpenseEntry:", {
-        name, amount, date, typeId, splitwiseExpenseId, upiReferenceNum
+        name,
+        amount,
+        date,
+        typeId,
+        splitwiseExpenseId,
+        upiReferenceNum,
+        externalUniqueId
     });
     try {
         const result = await sequelize.transaction(async (t) => {
             const createRes = await expenseEntries.create({
-                name, amount, date, splitwiseExpenseId, upiReferenceNum
+                name,
+                amount,
+                date,
+                splitwiseExpenseId,
+                upiReferenceNum,
+                externalUniqueId
             });
             const typeData = await getTypeData(typeId);
             const createRes2 = await expenseEntryToTypeMap.create({
@@ -156,7 +173,8 @@ router.post("/expenseEntry", async (req, res, next) => {
         date,
         typeId,
         splitwiseExpenseId,
-        upiReferenceNum } = req.body;
+        upiReferenceNum,
+        externalUniqueId } = req.body;
     try {
         if (!name || !amount || !date || !typeId) {
             return res.status(400).send("Input Invalid");
@@ -167,7 +185,13 @@ router.post("/expenseEntry", async (req, res, next) => {
         }
         // Insert Entry
         const insertRes = await insertExpenseEntry(
-            name, amount, date, typeId, splitwiseExpenseId, upiReferenceNum);
+            name,
+            amount,
+            date,
+            typeId,
+            splitwiseExpenseId,
+            upiReferenceNum,
+            externalUniqueId);
         console.log({ insertRes });
         return res.send(insertRes);
     } catch (e) {
@@ -242,6 +266,26 @@ router.get("/checkExpenseExistsByUpiReferenceNum", async (req, res) => {
     const expense = await expenseEntries.findOne({
         where: {
             upiReferenceNum: upiReferenceNum
+        }
+    });
+
+    res.send({
+        exists: expense !== null
+    });
+});
+
+// Check if a expense entry exists with the given externalUniqueId
+router.get("/checkExpenseExistsByExternalUniqueId", async (req, res) => {
+    const { uniqueId } = req.query;
+    console.log("checkExpenseExistsByUpiReferenceNum: ", req.query);
+
+    if (uniqueId === undefined) {
+        return res.status(400).send("uniqueId is undefined");
+    }
+
+    const expense = await expenseEntries.findOne({
+        where: {
+            externalUniqueId: uniqueId
         }
     });
 
