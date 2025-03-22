@@ -18,7 +18,7 @@ const getTodayDate = () => {
 };
 
 const getCategories = async () => {
-    const resp = await fetch("/expenseTypes");
+    const resp = await fetch("/expense/types");
     const jsonData = await resp.json();
     return jsonData;
 };

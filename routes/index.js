@@ -147,7 +147,7 @@ const processExpenseList = async (expenses) => {
     };
 };
 
-router.get("/expenseTypes", async (req, res) => {
+router.get("/expense/types", async (req, res) => {
     const data = await expenseTypes.findAll({
         attributes: ['id', 'name']
     });
@@ -156,7 +156,7 @@ router.get("/expenseTypes", async (req, res) => {
 });
 
 // Add a new expense type
-router.post("/expenseTypes", async (req, res) => {
+router.post("/expense/types", async (req, res) => {
     const { typeName, parentType } = req.body;
     if (typeName == undefined) {
         return res.status(400).send("typeName cannot be undefined");
