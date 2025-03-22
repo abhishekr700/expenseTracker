@@ -5,6 +5,7 @@ const {
     expenseTypes,
     expenseEntries,
     expenseEntryToTypeMap,
+    tags,
     sequelize
 } = require("../models");
 
@@ -39,7 +40,8 @@ const insertExpenseEntry = async (
     typeId,
     splitwiseExpenseId,
     upiReferenceNum,
-    externalUniqueId) => {
+    externalUniqueId,
+    expenseTags = []) => {
     console.log("insertExpenseEntry:", {
         name,
         amount,
@@ -47,7 +49,8 @@ const insertExpenseEntry = async (
         typeId,
         splitwiseExpenseId,
         upiReferenceNum,
-        externalUniqueId
+        externalUniqueId,
+        expenseTags
     });
     try {
         const result = await sequelize.transaction(async (t) => {
@@ -57,15 +60,34 @@ const insertExpenseEntry = async (
                 date,
                 splitwiseExpenseId,
                 upiReferenceNum,
-                externalUniqueId
-            });
+                externalUniqueId,
+            }, { transaction: t, });
             const typeData = await getTypeData(typeId);
             const createRes2 = await expenseEntryToTypeMap.create({
                 ExpenseEntryId: createRes.id,
                 ExpenseTypeId: typeData.id
-            });
+            }, { transaction: t, });
 
-            return { createRes, createRes2 };
+            console.log("Bulk inserting/updating tags");
+            const tagUpsertRes = await Promise.all(
+                expenseTags.map(name =>
+                    tags.findOrCreate({
+                        where: { name },
+                        transaction: t
+                    }) // Ensures uniqueness
+                )
+            );
+
+            const tagInstances = tagUpsertRes.map(res => res[0]);
+
+            console.log("Attaching tags to expenses");
+            await Promise.all(
+                tagInstances.map(tagInstance =>
+                    createRes.addTag(tagInstance, { transaction: t, })
+                )
+            );
+
+            return { createRes, createRes2, tagInstances };
         });
         return result;
     } catch (error) {
@@ -99,10 +121,13 @@ const getExpenseForMonth = async (month, year, category) => {
             ],
         },
         order: [['date', 'DESC'], ['createdAt', 'ASC']],
-        include: [{
-            model: expenseTypes,
-            where: expenseTypeWhereClause
-        }]
+        include: [
+            {
+                model: expenseTypes,
+                where: expenseTypeWhereClause
+            },
+            tags
+        ]
     });
     console.log("getExpenseForMonth:", data.length);
     return data;
@@ -174,7 +199,8 @@ router.post("/expenseEntry", async (req, res, next) => {
         typeId,
         splitwiseExpenseId,
         upiReferenceNum,
-        externalUniqueId } = req.body;
+        externalUniqueId,
+        tags } = req.body;
     try {
         if (!name || !amount || !date || !typeId) {
             return res.status(400).send("Input Invalid");
@@ -191,7 +217,9 @@ router.post("/expenseEntry", async (req, res, next) => {
             typeId,
             splitwiseExpenseId,
             upiReferenceNum,
-            externalUniqueId);
+            externalUniqueId,
+            tags
+        );
         console.log({ insertRes });
         return res.send(insertRes);
     } catch (e) {

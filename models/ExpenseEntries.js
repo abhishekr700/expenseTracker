@@ -26,7 +26,7 @@ const ExpenseEntries = {
         allowNull: false
     },
     splitwiseExpenseId: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.BIGINT,
         allowNull: true
     },
     upiReferenceNum: {
